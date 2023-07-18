@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://glitch.com/favicon.ico" />
+
+    <title>Project</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <center>
+    <div>Login & Dectection</div>
+    <button type="button" onclick="init()">Start</button>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+      const URL = "https://teachablemachine.withgoogle.com/models/FYuuCXqWw/";
+
+      let model, webcam, labelContainer, maxPredictions;
+
+      // NoteHuy1: tai va cai dat camera
+      async function init() {
+        // NoteHuy2: lenh get api tu google
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // NoteHuy3: cai dat camera
+        const flip = true; // 
+        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+        await webcam.setup(); // NoteHuy: hoi quyen camera
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        labelContainer = document.getElementById("label-container");
+      }
+
+      // NoteHuy4: vong lap
+      async function loop() {
+        webcam.update();
+        await predict();
+        window.requestAnimationFrame(loop);
+      }
+
+      // NoteHuy5: chay camera va thu model
+      async function predict() {
+        // predict can take in an image, video or canvas html element
+        const predictions = await model.predictTopK(webcam.canvas, 1);
+        const label = predictions[0].className;
+
+        if (label === "Huy Muốn Đăng Nhập") {
+          window.location.href = "https://sites.google.com/view/detection-segmentation/";
+        }
+
+        labelContainer.innerText = label;
+      }
+    </script>
+    </center>
+  </body>
+</html>
